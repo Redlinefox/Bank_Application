@@ -16,13 +16,12 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 	private String pgPassword = "pgadmin";
 	
 	private final String createAccount = "INSERT INTO public.account(account_type, balance, last_update, owner_id) VALUES (?, ?, CURRENT_TIMESTAMP, ?)";
-	private final String viewUserAccs = "SELECT acc_id, account_type, balance, last_update, approved FROM public.account WHERE owner_id=?";
+	private final String viewUserAccs = "SELECT acc_id, account_type, balance, last_update, approved, owner_id FROM public.account WHERE owner_id=?";
 	private final String approved = "UPDATE public.account SET approved=true, last_update=CURRENT_TIMESTAMP, approved_date=CURRENT_TIMESTAMP, approved_by=? WHERE acc_id = ?";
 	private final String rejected = "UPDATE public.account SET approved=false, last_update=CURRENT_TIMESTAMP, approved_date=CURRENT_TIMESTAMP, approved_by=? WHERE acc_id = ?";
 	private final String deposit = "UPDATE public.account SET balance = balance + ?, last_update=CURRENT_TIMESTAMP, WHERE acc_id = ?";
 	private final String withdraw = "UPDATE public.account SET balance = balance - ?, last_update=CURRENT_TIMESTAMP, WHERE acc_id = ?";
 	private final String checkBal = "SELECT balance FROM public.account WHERE acc_id=?";
-//	private final String deleteUser = "";
 	private final String checkUsername = "SELECT username FROM bank_user WHERE username =?";
 	
 	protected Connection getConnection() {
@@ -39,11 +38,11 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 	
 	
 	@Override
-	public void createAccount(User user, Account acc, BigDecimal start) throws SQLException {
+	public void createAccount(User user, Account acc, double start) throws SQLException {
 		try(Connection connection = getConnection()){
-			PreparedStatement prep = connection.prepareStatement(createAccount);
+			PreparedStatement prep = connection.prepareStatement(viewUserAccs);
 			prep.setString(1, acc.getAccountType());
-			prep.setBigDecimal(2, start);
+			prep.setDouble(2, start);
 			prep.setInt(4, user.getUserId());
 			prep.executeUpdate();
 		}catch (Exception e) {
@@ -51,6 +50,23 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 		}
 	}
 
+	@Override
+	public boolean checkAccountOwnerId(int userID, int ownerID) throws SQLException {
+		try(Connection connection = getConnection()){
+			PreparedStatement prep = connection.prepareStatement(viewUserAccs);
+			prep.setInt(1, userID);
+			ResultSet rs = prep.executeQuery();
+			
+			if(rs.next()) {
+				if (rs.getInt(5) == userID) { return true; }
+				else { return false; }
+			}
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
 	@Override
 	public void viewUserAccounts(int id) throws SQLException {
 		try(Connection connection = getConnection()){
@@ -100,10 +116,10 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 
 
 	@Override
-	public void deposit(BigDecimal d, int accountID) throws SQLException {
+	public void deposit(double d, int accountID) throws SQLException {
 		try(Connection connection = getConnection()){
 			PreparedStatement prep = connection.prepareStatement(approved);
-			prep.setBigDecimal(1, d);
+			prep.setDouble(1, d);
 			prep.setInt(2, accountID);
 			prep.executeUpdate();
 		}catch (Exception e) {
@@ -114,10 +130,10 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 
 
 	@Override
-	public void withdraw(BigDecimal d, int accountID) throws SQLException {
+	public void withdraw(double d, int accountID) throws SQLException {
 		try(Connection connection = getConnection()){
 			PreparedStatement prep = connection.prepareStatement(approved);
-			prep.setBigDecimal(1, d);
+			prep.setDouble(1, d);
 			prep.setInt(2, accountID);
 			prep.executeUpdate();
 		}catch (Exception e) {
@@ -128,7 +144,7 @@ public class AccountDAO_Ops implements AccountDAO<Account> {
 
 
 	@Override
-	public void transfer(BigDecimal d, int id1, int id2) throws SQLException {
+	public void transfer(double d, int id1, int id2) throws SQLException {
 		// TODO Auto-generated method stub
 		
 	}
