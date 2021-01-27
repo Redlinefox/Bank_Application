@@ -1,7 +1,6 @@
 package com.bankapp.business_logic;
 
 import java.sql.*;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 import com.bankapp.dao.UserDAO_Ops;
@@ -131,6 +130,8 @@ public class Create_New_User {
 			}catch (NumberFormatException e) {
 				System.out.println("\nInvalid input detected");
 				userType_choice = 0;
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
         }
 	}

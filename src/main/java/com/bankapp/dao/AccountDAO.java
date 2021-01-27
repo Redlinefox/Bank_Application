@@ -1,6 +1,5 @@
 package com.bankapp.dao;
 
-import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -8,7 +7,7 @@ import com.bankapp.model.User;
 
 public interface AccountDAO<T> {
 	
-	void createAccount(User u, T t, double d) throws SQLException;
+	void createAccount(int id, String t, double d) throws SQLException;
 	
 	void viewUserAccounts(int id) throws SQLException;
 
@@ -24,8 +23,13 @@ public interface AccountDAO<T> {
 	
 	void transfer(double d, int id1, int id2) throws SQLException;
 	
-	BigDecimal checkBalance(int id) throws SQLException;
+	double checkBalance(int id) throws SQLException;
 	
 	boolean checkAccountOwnerId(int userID, int ownerID) throws SQLException;
+	
+	boolean checkAccountExists(int accountID);
+	
+	void updateLog(int id, int id2, double d, int type);
+	void updateLog(int id, double d, int type);
 	
 }

@@ -12,9 +12,9 @@ public class EntryPage {
 		
 		while (choice < 1 || choice > 3 ) {
 			choice = 0;
-			System.out.println("\n\nPlease input one of the choices below:");
-			System.out.println("1. Login\n2. New User\n3. Exit");
-			System.out.print("Intake field: ");
+			System.out.println("\n\nMain Menu\n");
+			System.out.println("1. Login\n2. New User\n3. Exit\n");
+			System.out.print("Input field: ");
 			
 			try {
 				choice = Integer.parseInt(scan.nextLine());
