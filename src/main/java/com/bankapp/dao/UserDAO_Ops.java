@@ -107,7 +107,7 @@ public class UserDAO_Ops implements UserDAO<User>{
 		        		return rs.getInt(3);
 			        }
 			        else {
-			        	System.out.println("Password does not match user account");
+			        	System.out.println("\nPassword does not match user account");
 			        	return 0;
 			        }
 				}

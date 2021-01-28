@@ -2,36 +2,34 @@ package com.bankapp.business_logic;
 
 import java.sql.*;
 import java.util.Scanner;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.bankapp.dao.AccountDAO_Ops;
 import com.bankapp.dao.UserDAO_Ops;
 import com.bankapp.model.User;
 
 public class HomePage {
-
+	final static Logger logger = LogManager.getLogger(HomePage.class.getName());
 	private int menuChoice;
 	Scanner scan = new Scanner(System.in);
 	UserDAO_Ops userOps = new UserDAO_Ops();
 	AccountDAO_Ops accountOps = new AccountDAO_Ops();
 	AccountActions aa = new AccountActions();
 	
-	public HomePage(int user_id) throws SQLException {
-		
-		User user = userOps.selectUser(user_id);
-		System.out.println("\nHello " + user.getFirstName() + " " + user.getLastName());
-		
-		// UserDAO to input user_id and return a User object with states
-		// if the user.userType == "Customer" call the Customer method options
-		// if the user.userType == "Employee" call the Employee method options
+	public HomePage(int user_id) throws SQLException {	
+		User user = userOps.selectUser(user_id);		
 		if (user.getUserType().equals("Customer")){
 			CustomerHome(user);
 		}
-		else if (user.getUserType() == "Employee") {
+		else if (user.getUserType().equals("Employee")){
 			EmployeeHome(user);
 		} 
 	}
 	
 	public void CustomerHome(User user) {
-		System.out.println("Customer Menu");
+		System.out.println("\n\nCustomer Menu - " + user.getFirstName() + " " + user.getLastName());
 		while (menuChoice < 1 || menuChoice > 5 ) {
 			menuChoice = 0;
 			try {
@@ -64,7 +62,7 @@ public class HomePage {
 					menuChoice = 0;
 				}
 				else if (menuChoice == 5) {
-					System.out.println("Exit");
+					System.out.println("\nExiting Customer Menu");
 				}
 				else {
 					System.out.println("\nInvalid choice detected\n"); 
@@ -80,6 +78,40 @@ public class HomePage {
 	}
 	
 	public void EmployeeHome(User user) {
-		System.out.println("Employee Menu");
+		System.out.println("\n\nEmployee Menu - " + user.getFirstName() + " " + user.getLastName());
+		while (menuChoice < 1 || menuChoice > 4 ) {
+			menuChoice = 0;
+			try {
+				System.out.println("\n[Employee Options]");
+				System.out.println("1. Approve Accounts\n2. View Customer Accounts\n3. Transaction Log\n4. Exit");
+				System.out.print("Input: ");
+			
+				menuChoice = Integer.parseInt(scan.nextLine());
+				
+				if (menuChoice == 1) {
+					aa.ApproveAccounts(user.getUserId());
+					menuChoice = 0;
+				}
+				else if (menuChoice == 2) {
+					aa.ViewAllAccounts();
+					menuChoice = 0;
+				}
+				else if (menuChoice == 3) {
+					System.out.println();
+					aa.ViewTransactionLog();
+					menuChoice = 0;
+				}
+				else if (menuChoice == 4) {
+					System.out.println("\nExiting Employee Menu");
+				}
+				else {
+					System.out.println("\nInvalid choice detected\n"); 
+					menuChoice = 0;
+				}
+			} catch(NumberFormatException e) {
+				System.out.println("\nInvalid input detected"); 
+				menuChoice = 0;
+			}
+		}
 	}
 }

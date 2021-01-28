@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.Scanner;
 import com.bankapp.dao.AccountDAO_Ops;
 import com.bankapp.dao.UserDAO_Ops;
+import com.bankapp.model.User;
 
 public class AccountActions {
 
@@ -12,6 +13,7 @@ public class AccountActions {
 	AccountDAO_Ops accountOps = new AccountDAO_Ops();
 	double money = 0;
 	String accountType;
+	User user = new User();
 	
 	AccountActions(){}
 	
@@ -109,7 +111,7 @@ public class AccountActions {
 	
 	public void createAccount(int user_id) {
 		try {
-			System.out.print("Creating Account\n\nChoose new account type:\n1. Saving\n2. Checking");
+			System.out.println("Creating Account\n\nChoose new account type:\n1. Saving\n2. Checking");
 			System.out.print("Input: ");
 			int type_choice = Integer.parseInt(scan.nextLine());
 			switch (type_choice) {
@@ -130,7 +132,9 @@ public class AccountActions {
 					System.out.println("Error: will not accept zero or negative money.");
 				}
 				else {
-					accountOps.createAccount(user_id, accountType, money);
+					accountOps.createAccount(user_id, accountType);
+					accountOps.deposit(money, user_id);
+					System.out.println("\nNew " + accountType + " with $" + money +" created.  Awaiting approval.\n");
 				}
 			}
 		} catch (SQLException e) {
@@ -140,5 +144,46 @@ public class AccountActions {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void ApproveAccounts(int employee_id) {
+		int choice = 0;
+		while(choice < 1 || choice > 3) {
+			try {
+				System.out.println("\n\n[Account Approval Menu]\n");
+				accountOps.viewUnapproved();
+				System.out.println("1. Approve an Account\n2. Approve All Accounts\n3. Exit");
+				System.out.println("Input: ");
+				choice = Integer.parseInt(scan.nextLine());
+				if(choice == 1) {
+					System.out.print("Choose account id: ");
+					int account_id = Integer.parseInt(scan.nextLine());
+					accountOps.setApproved(employee_id, account_id);
+					choice = 0;
+				}
+				else if(choice == 2) {
+					System.out.println("Approve all choice");
+					accountOps.approveAll(employee_id);
+					choice = 0;
+				}
+				else if(choice == 3) {
+					System.out.println("\nExiting Approve Accounts Menu");
+				}
+			} catch(NumberFormatException e) {
+				System.out.println("\nInvalid input detected"); 
+				choice = 0;
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public void ViewAllAccounts() {
+		System.out.println("\n");
+		accountOps.viewAllAccounts(); 
+	}
+	
+	public void ViewTransactionLog() {
+		accountOps.viewTransactionLog();
 	}
 }

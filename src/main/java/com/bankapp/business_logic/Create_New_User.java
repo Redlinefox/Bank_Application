@@ -2,23 +2,33 @@ package com.bankapp.business_logic;
 
 import java.sql.*;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import com.bankapp.dao.UserDAO_Ops;
 import com.bankapp.model.User;
 
 public class Create_New_User {
-
+	final static Logger logger = LogManager.getLogger(Create_New_User.class.getName());
 	private boolean running = true;
 	
 	Scanner scan=new Scanner(System.in);
 	private String username, password = "";
 	private String firstName, lastName, user_type = "";
 	
+	String userRegex = "^[a-zA-Z0-9]+$";
+	String nameRegex = "^[a-zA-Z]+$";
+	Pattern pattern = Pattern.compile(userRegex);
+	Pattern pattern2 = Pattern.compile(nameRegex);
 	public int choice = 0;
 	private int userType_choice = 0;
 	
 	
 	public Create_New_User() {
+		logger.info("Entering Create_New_User");
 		System.out.println("\nCreate New User Page\n");
 		User user = new User();
 		UserDAO_Ops userDO = new UserDAO_Ops();
@@ -26,19 +36,27 @@ public class Create_New_User {
         while(running) {				
 			System.out.print("Input a Username: ");
 	        username = scan.nextLine();
-	        
+	        Matcher matcher = pattern.matcher(username);
 	        try {
 	        	if(username.equals("")) {
 	        		System.out.println("Error: no input detected");
+	        		logger.warn("No user input with ENTRY");
 	        		retry();
+	        		continue;
+	        	}
+	        	else if(!matcher.matches()) {
+	        		System.out.println("Error: choose a username with letters and numbers in it");
+	        		logger.warn("Improper text with REGEX");
+	        		retry();
+	        		continue;
 	        	}
 		        else if(userDO.checkUsername(username)) {
 					user.setUsername(username);
-					
 					System.out.print("Input a Password: ");
 				    password = scan.nextLine();
 				    if(password.equals("")) {
 				    	System.out.println("Error: no input detected");
+				    	logger.warn("No user input with ENTRY");
 		        		retry();
 		        		continue;
 				    }
@@ -46,31 +64,47 @@ public class Create_New_User {
 				    
 				    System.out.print("Input your legal first name: ");
 				    firstName = scan.nextLine();
+				    matcher = pattern2.matcher(firstName);
 				    if(firstName.equals("")) {
 				    	System.out.println("Error: no input detected");
+				    	logger.warn("No user input with ENTRY");
 		        		retry();
 		        		continue;
 				    }
-				    user.setFirstName(firstName);
+				    else if(!matcher.matches()) {
+				    	System.out.println("Error: first name must only have letters in it");
+				    	logger.warn("Improper text with REGEX");
+		        		retry();
+		        		continue;
+				    }
+				    else {
+				    	user.setFirstName(firstName);
+				    }
 				    
 				    System.out.print("Input your legal last name: ");
 				    lastName = scan.nextLine();
+				    matcher = pattern2.matcher(lastName);
 				    if(lastName.equals("")) {
 				    	System.out.println("Error: no input detected");
+				    	logger.warn("No user input with ENTRY");
 		        		retry();
 		        		continue;
 				    }
-				    user.setLastName(lastName);
-
-				    //call method to choose type
+				    else if(!matcher.matches()) {
+				    	System.out.println("Error: last name must only have letters in it");
+				    	logger.warn("Improper text with REGEX");
+		        		retry();
+		        		continue;
+				    }
+				    else {
+				    	user.setLastName(lastName);
+				    }
+				    
+				    //Choose User Type: Customer or Employee
 				    chooseType();
 				    user.setUserType(user_type);
 
-				    try {
-						userDO.createUser(user);
-					} catch (SQLException e) {
-						e.printStackTrace();
-					}
+					userDO.createUser(user);
 				    System.out.println("\nNew User Created!");
 				}
 				else {
@@ -100,10 +134,12 @@ public class Create_New_User {
 				}
 				else {
 					System.out.println("\nInvalid choice detected");
+					logger.warn("Invalid selection detected");
 					choice = 0;
 				}
 			} catch(Exception e) {
 				System.out.println("\nInvalid input.");
+				logger.warn("Invalid input detected");
 				//scan.next();
 				choice = 0;
 			}
@@ -125,7 +161,7 @@ public class Create_New_User {
 					running = false;
 				}
 				else {
-					System.out.println("Invalid choice detected");
+					System.out.println("\nInvalid choice detected");
 				}
 			}catch (NumberFormatException e) {
 				System.out.println("\nInvalid input detected");

@@ -1,21 +1,20 @@
 package com.bankapp.dao;
 
 import java.sql.SQLException;
-import java.util.List;
 
-import com.bankapp.model.User;
-
-public interface AccountDAO<T> {
+public interface AccountDAO {
 	
-	void createAccount(int id, String t, double d) throws SQLException;
+	void createAccount(int id, String t) throws SQLException;
 	
 	void viewUserAccounts(int id) throws SQLException;
 
-	List<T> viewAllAccounts();
+	void viewAllAccounts();
+	void viewUnapproved();
 	
-	void setApproved(User u, int id) throws SQLException;
+	void setApproved(int employee_id, int id) throws SQLException;
+	void approveAll(int employee_id) throws SQLException;
 	
-	void setRejected(User u, int id) throws SQLException;
+	void setRejected(int employee_id, int id) throws SQLException;
 	
 	void deposit(double d, int id) throws SQLException;
 	
@@ -29,7 +28,5 @@ public interface AccountDAO<T> {
 	
 	boolean checkAccountExists(int accountID);
 	
-	void updateLog(int id, int id2, double d, int type);
-	void updateLog(int id, double d, int type);
-	
+	void viewTransactionLog();
 }

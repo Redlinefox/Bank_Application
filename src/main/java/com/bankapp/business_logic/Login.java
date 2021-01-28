@@ -3,10 +3,13 @@ package com.bankapp.business_logic;
 import java.sql.SQLException;
 import java.util.*;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.bankapp.dao.UserDAO_Ops;
 
 public class Login {
-	
+	final static Logger logger = LogManager.getLogger(Login.class.getName());
 	private boolean running = true;
 	private int userID = 0;
 	private int choice;
@@ -14,6 +17,7 @@ public class Login {
 	UserDAO_Ops uDAO = new UserDAO_Ops();
 	
 	public Login(){
+		logger.info("Entered Login Page");
 		System.out.println("\n\nLogin Page\n");
 
         while(running) {				
@@ -38,6 +42,7 @@ public class Login {
 		while (choice < 1 || choice > 2) {
 			try{
 				System.out.println("Do you want to start over or exit?\n1: Start Over\n2: Exit to Login Menu");
+				System.out.print("Input: ");
 				choice = Integer.parseInt(scan.nextLine());
 				if (choice == 1) {
 					System.out.println("\nStarting over");
