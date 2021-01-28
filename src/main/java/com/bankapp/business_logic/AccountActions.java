@@ -1,6 +1,7 @@
 package com.bankapp.business_logic;
 
 import java.sql.SQLException;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import com.bankapp.dao.AccountDAO_Ops;
 import com.bankapp.dao.UserDAO_Ops;
@@ -20,24 +21,28 @@ public class AccountActions {
 	public void Deposit(int user_id) {
 		try {
 			System.out.print("Which account ID are you depositing into: ");
-			int acc_choice = Integer.parseInt(scan.nextLine());
-			System.out.println("UserID: " + user_id + " acc_choice: " + acc_choice);
-
-			if (accountOps.checkAccountOwnerId(user_id, acc_choice)) {
-				System.out.print("Deposit amount: ");
-				money = scan.nextDouble();
-				if (money < 0) {
-					System.out.println("Error: will not accept zero or negative money.");
+			int account_id = scan.nextInt();
+			if (accountOps.checkAccountOwnerId(user_id, account_id)) {
+				if(accountOps.checkApproved(account_id)) {
+					System.out.print("Deposit amount: ");
+					money = scan.nextDouble();
+					if(check2Decimals(money)) {
+						if (money > 0) {
+							accountOps.deposit(money, account_id);
+						}
+						else {System.out.println("Error: will not accept zero or negative money.");}
+					}
+					else {
+						System.out.println("Error: more than 2 decimal placed detected");
+					}
 				}
-				else {
-					accountOps.deposit(money, acc_choice);
-				}
+				else {System.out.println("Account not approved for transactions");}
 			}
-			else {
-				System.out.println("Error: You do not own that account.");
-			}
+			else {System.out.println("Error: You do not own that account.");}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}catch (NumberFormatException e) {
+			System.out.println("Error: invalid input");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -46,27 +51,31 @@ public class AccountActions {
 	public void Withdraw(int user_id) {
 		try {
 			System.out.print("Which account ID are you withdrawing from: ");
-			int acc_choice = Integer.parseInt(scan.nextLine());
+			int acc_choice = scan.nextInt();
 			if (accountOps.checkAccountOwnerId(user_id, acc_choice)) {
-				System.out.println("Withdraw amount: ");
-				money = scan.nextDouble();
-				if (money < 0) {
-					System.out.println("Error: will not accept zero or negative money.");
-				}
-				else {
-					if(accountOps.checkBalance(acc_choice) < money) {
-						System.out.println("Error: cannot withdraw more than $" + accountOps.checkBalance(acc_choice));
+				if(accountOps.checkApproved(acc_choice)) {
+					System.out.print("Withdraw amount: ");
+					money = scan.nextDouble();
+					if(check2Decimals(money)) {
+						if (money > 0) {
+							if(accountOps.checkBalance(acc_choice) > money) {
+								accountOps.withdraw(money, acc_choice);
+							}
+							else {System.out.println("Error: cannot withdraw more than $" + accountOps.checkBalance(acc_choice));}
+						}
+						else {System.out.println("Error: will not accept zero or negative money.");}
 					}
 					else {
-						accountOps.withdraw(money, acc_choice);
+						System.out.println("Error: more than 2 decimal placed detected");
 					}
 				}
+				else {System.out.println("Account not approved for transactions");}
 			}
-			else {
-				System.out.println("Error: You do not own that account.");
-			}
+			else {System.out.println("Error: You do not own that account.");}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}catch (NumberFormatException e) {
+			System.out.println("Error: invalid input");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -76,34 +85,37 @@ public class AccountActions {
 	public void Transfer(int user_id) {
 		try {
 			System.out.print("Which account ID are you transfering from: ");
-			int acc_choice = Integer.parseInt(scan.nextLine());
+			int acc_choice = scan.nextInt();
 			if (accountOps.checkAccountOwnerId(user_id, acc_choice)) {
-				System.out.print("Which account ID are you transfering into: ");
-				int receiver = Integer.parseInt(scan.nextLine());
-				if (accountOps.checkAccountExists(receiver)) {
-					System.out.println("Transfer amount: ");
-					money = scan.nextDouble();
-					if (money < 0) {
-						System.out.println("Error: will not accept zero or negative money.");
-					}
-					else {
-						if(accountOps.checkBalance(acc_choice) < money) {
-							System.out.println("Error: cannot withdraw more than $" + accountOps.checkBalance(acc_choice));
+				System.out.println("TESTING checkAccountOwnerId: "+user_id + " " + acc_choice);
+				if(accountOps.checkApproved(acc_choice)) {
+					System.out.print("Which account ID are you transfering into: ");
+					int receiver = Integer.parseInt(scan.nextLine());
+					if (accountOps.checkAccountExists(receiver)) {
+						System.out.print("Transfer amount: ");
+						money = scan.nextDouble();
+						if(check2Decimals(money)) {
+							if (money < 0) {
+								System.out.println("Error: will not accept zero or negative money.");
+							}
+							else {
+								if(accountOps.checkBalance(acc_choice) < money) {
+									System.out.println("Error: cannot withdraw more than $" + accountOps.checkBalance(acc_choice));
+								}
+								else {accountOps.transfer(money, acc_choice, receiver);}
+							}
 						}
-						else {
-							accountOps.transfer(money, acc_choice, receiver);
-						}
+						else {System.out.println("Error: more than 2 decimal placed detected");}
 					}
+					else {System.out.println("Error: That account does not exist.");}
 				}
-				else {
-					System.out.println("Error: That account does not exist.");
-				}
+				else {System.out.println("Account not approved for transactions");}				
 			}
-			else {
-				System.out.println("Error: You do not own that account.");
-			}
+			else {System.out.println("Error: You do not own that account.");}
 		} catch (SQLException e) {
 			e.printStackTrace();
+		}catch (NumberFormatException e) {
+			System.out.println("Error: invalid input");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -111,9 +123,9 @@ public class AccountActions {
 	
 	public void createAccount(int user_id) {
 		try {
-			System.out.println("Creating Account\n\nChoose new account type:\n1. Saving\n2. Checking");
+			System.out.println("\n\nChoose new account type:\n1. Saving\n2. Checking");
 			System.out.print("Input: ");
-			int type_choice = Integer.parseInt(scan.nextLine());
+			int type_choice = scan.nextInt();
 			switch (type_choice) {
 				case 1 : 
 					accountType = "Saving";
@@ -128,19 +140,23 @@ public class AccountActions {
 			else {
 				System.out.print("Starting Balance: ");
 				money = scan.nextDouble();
-				if (money < 0) {
-					System.out.println("Error: will not accept zero or negative money.");
+				if(check2Decimals(money)) {
+					if (money < 0) {
+						System.out.println("Error: will not accept zero or negative money.");
+					}
+					else {
+						accountOps.createAccount(user_id, accountType, money);
+						System.out.println("\nNew " + accountType + " with $" + money +" created.  Awaiting approval.\n");
+					}
 				}
-				else {
-					accountOps.createAccount(user_id, accountType);
-					accountOps.deposit(money, user_id);
-					System.out.println("\nNew " + accountType + " with $" + money +" created.  Awaiting approval.\n");
-				}
+				else {System.out.println("Error: more than 2 decimal placed detected");}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} catch(NumberFormatException e) {
 			System.out.println("\nInvalid input detected"); 
+		}catch (InputMismatchException e) {
+			System.out.println("\nInvalid input detected");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -152,8 +168,8 @@ public class AccountActions {
 			try {
 				System.out.println("\n\n[Account Approval Menu]\n");
 				accountOps.viewUnapproved();
-				System.out.println("1. Approve an Account\n2. Approve All Accounts\n3. Exit");
-				System.out.println("Input: ");
+				System.out.println("\n1. Approve an Account\n2. Approve All Accounts\n3. Exit");
+				System.out.print("Input: ");
 				choice = Integer.parseInt(scan.nextLine());
 				if(choice == 1) {
 					System.out.print("Choose account id: ");
@@ -162,8 +178,8 @@ public class AccountActions {
 					choice = 0;
 				}
 				else if(choice == 2) {
-					System.out.println("Approve all choice");
 					accountOps.approveAll(employee_id);
+					System.out.println("\nAll accounts approved");
 					choice = 0;
 				}
 				else if(choice == 3) {
@@ -185,5 +201,19 @@ public class AccountActions {
 	
 	public void ViewTransactionLog() {
 		accountOps.viewTransactionLog();
+	}
+	
+	public boolean check2Decimals(double amount) {
+		Double d = amount;
+		String[] splitter = d.toString().split("\\.");
+		System.out.println(splitter[0].length());
+		System.out.println(splitter[1].length());
+	
+		if(splitter[1].length() > 2) {
+			return false;
+		}
+		else {
+			return true;
+		}
 	}
 }

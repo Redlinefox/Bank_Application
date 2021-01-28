@@ -18,7 +18,8 @@ public class HomePage {
 	AccountDAO_Ops accountOps = new AccountDAO_Ops();
 	AccountActions aa = new AccountActions();
 	
-	public HomePage(int user_id) throws SQLException {	
+	public HomePage(int user_id) throws SQLException {
+		userOps.loginTime(user_id);
 		User user = userOps.selectUser(user_id);		
 		if (user.getUserType().equals("Customer")){
 			CustomerHome(user);
@@ -33,6 +34,7 @@ public class HomePage {
 		while (menuChoice < 1 || menuChoice > 5 ) {
 			menuChoice = 0;
 			try {
+				System.out.println("\n");
 				accountOps.viewUserAccounts(user.getUserId());
 			
 				System.out.println("\n[Account Options]");
@@ -42,22 +44,18 @@ public class HomePage {
 				menuChoice = Integer.parseInt(scan.nextLine());
 				
 				if (menuChoice == 1) {
-					System.out.println("Deposit choice");
 					aa.Deposit(user.getUserId());
 					menuChoice = 0;
 				}
 				else if (menuChoice == 2) {
-					System.out.println("Withdraw choice");
 					aa.Withdraw(user.getUserId());
 					menuChoice = 0;
 				}
 				else if (menuChoice == 3) {
-					System.out.println("Transfer choice");
 					aa.Transfer(user.getUserId());
 					menuChoice = 0;
 				}
 				else if (menuChoice == 4) {
-					System.out.println("Create new Account");
 					aa.createAccount(user.getUserId());
 					menuChoice = 0;
 				}
@@ -69,7 +67,8 @@ public class HomePage {
 					menuChoice = 0;
 				}
 			} catch(NumberFormatException e) {
-				System.out.println("\nInvalid input detected"); 
+				e.printStackTrace();
+//				System.out.println("\nInvalid input detected"); 
 				menuChoice = 0;
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -85,7 +84,6 @@ public class HomePage {
 				System.out.println("\n[Employee Options]");
 				System.out.println("1. Approve Accounts\n2. View Customer Accounts\n3. Transaction Log\n4. Exit");
 				System.out.print("Input: ");
-			
 				menuChoice = Integer.parseInt(scan.nextLine());
 				
 				if (menuChoice == 1) {

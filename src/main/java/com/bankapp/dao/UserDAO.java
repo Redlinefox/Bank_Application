@@ -20,4 +20,5 @@ public interface UserDAO<T> {
 	int matchUsernamePass() throws SQLException;
 	
 	boolean checkUsername(String username) throws SQLException;
+	void loginTime(int id);
 }

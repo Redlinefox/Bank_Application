@@ -4,7 +4,7 @@ import java.sql.SQLException;
 
 public interface AccountDAO {
 	
-	void createAccount(int id, String t) throws SQLException;
+	void createAccount(int id, String t, double amount) throws SQLException;
 	
 	void viewUserAccounts(int id) throws SQLException;
 
@@ -29,4 +29,6 @@ public interface AccountDAO {
 	boolean checkAccountExists(int accountID);
 	
 	void viewTransactionLog();
+	
+	boolean checkApproved(int id);
 }

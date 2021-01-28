@@ -18,6 +18,8 @@ public class UserDAO_Ops implements UserDAO<User>{
 	private final String sqlCreateUser = "INSERT INTO public.bank_user(username, password, first_name, last_name, user_type, created_on) VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)";
 	private final String getUser = "SELECT user_id, first_name, last_name, user_type FROM public.bank_user WHERE user_id = ?";
 	private final String checkUsernamePass = "SELECT username, password, user_id FROM bank_user WHERE username =?";
+	private final String updateLogin = "UPDATE public.bank_user SET last_login=CURRENT_TIMESTAMP WHERE user_id = ?";
+	
 	
 	Scanner scan = new Scanner(System.in);
 	User user = new User();
@@ -142,6 +144,18 @@ public class UserDAO_Ops implements UserDAO<User>{
 			e.printStackTrace();
 		}
 		return false;
+	}
+
+	@Override
+	public void loginTime(int id) {
+		try(Connection connection = getConnection()){
+			PreparedStatement prep = connection.prepareStatement(updateLogin);
+			prep.setInt(1, id);
+			prep.executeUpdate();
+		}catch (Exception e) {
+			e.printStackTrace();
+		}	
+		
 	}
 	
 	
